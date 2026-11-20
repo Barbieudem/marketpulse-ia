@@ -1,0 +1,212 @@
+# Resultados — MarketPulse IA (CeraVe)
+
+- Fuente tendencias: **Google Trends (CSV exportado de trends.google.com)**
+- Fuente transacciones (CLV): **UCI Online Retail II (transacciones reales)**
+- Motor NLP: **Gemini (gemini-3.5-flash)**
+
+## 1. Ciclo de vida de tendencias (crecimiento y aceleración)
+
+| keyword        |   interes_actual |   crec_semanal_% |   aceleracion_pp |   momentum_4s_% | semana_pico   |
+|:---------------|-----------------:|-----------------:|-----------------:|----------------:|:--------------|
+| CeraVe         |               51 |         10.8696  |         -7.07915 |        12       | 2023-06-11    |
+| La Roche-Posay |                5 |         25       |         25       |        41.6667  | 2026-01-04    |
+| Cetaphil       |               25 |          8.69565 |         -6.30435 |        14.4737  | 2025-07-20    |
+| Neutrogena     |               22 |         15.7895  |         -2.96053 |         9.09091 | 2023-04-09    |
+| Nivea          |               58 |          9.43396 |         -3.332   |         7.40741 | 2026-01-04    |
+
+## 2. Pronóstico de interés (regresión)
+
+| modelo             |    MSE |   RMSE |   MAE |   MAPE_% |   SMAPE_% |
+|:-------------------|-------:|-------:|------:|---------:|----------:|
+| Ingenuo (y_t-1)    | 39.889 |  6.316 | 4.016 |    9.004 |     8.904 |
+| Random Forest      | 32.779 |  5.725 | 4.085 |    9.506 |     9.337 |
+| Red Neuronal (MLP) | 86.1   |  9.279 | 5.699 |   13.163 |    12.207 |
+| KNN                | 37.086 |  6.09  | 4.443 |   10.455 |    10.122 |
+
+### Mejores hiperparámetros
+
+{'Random Forest': {'max_depth': 3, 'min_samples_leaf': 3, 'n_estimators': 300}, 'Red Neuronal (MLP)': {'alpha': 0.001, 'hidden_layer_sizes': (32, 16), 'learning_rate_init': 0.001}, 'KNN': {'n_neighbors': 11, 'weights': 'distance'}}
+
+### Simulación de hiperparámetros (top 5 por modelo)
+
+| modelo             |   max_depth |   min_samples_leaf |   n_estimators |   RMSE_CV |   std |   rank_test_score |   alpha | hidden_layer_sizes   |   learning_rate_init |   n_neighbors | weights   |
+|:-------------------|------------:|-------------------:|---------------:|----------:|------:|------------------:|--------:|:---------------------|---------------------:|--------------:|:----------|
+| Random Forest      |           3 |                  3 |            300 |    11.263 | 8.82  |                 1 | nan     | nan                  |              nan     |           nan | nan       |
+| Random Forest      |             |                  3 |            300 |    11.367 | 8.753 |                 2 | nan     | nan                  |              nan     |           nan | nan       |
+| Random Forest      |           6 |                  3 |            300 |    11.369 | 8.754 |                 3 | nan     | nan                  |              nan     |           nan | nan       |
+| Random Forest      |           3 |                  3 |            100 |    11.369 | 8.743 |                 4 | nan     | nan                  |              nan     |           nan | nan       |
+| Random Forest      |             |                  3 |            100 |    11.501 | 8.694 |                 5 | nan     | nan                  |              nan     |           nan | nan       |
+| Red Neuronal (MLP) |         nan |                nan |            nan |    14.936 | 7.39  |                 1 |   0.001 | (32, 16)             |                0.001 |           nan | nan       |
+| Red Neuronal (MLP) |         nan |                nan |            nan |    15.197 | 7.653 |                 2 |   0.01  | (32, 16)             |                0.001 |           nan | nan       |
+| Red Neuronal (MLP) |         nan |                nan |            nan |    18.343 | 9.566 |                 3 |   0.001 | (16,)                |                0.01  |           nan | nan       |
+| Red Neuronal (MLP) |         nan |                nan |            nan |    18.344 | 9.564 |                 4 |   0.01  | (16,)                |                0.01  |           nan | nan       |
+| Red Neuronal (MLP) |         nan |                nan |            nan |    19.197 | 9.555 |                 5 |   0.01  | (16,)                |                0.001 |           nan | nan       |
+| KNN                |         nan |                nan |            nan |    11.956 | 7.927 |                 1 | nan     | nan                  |              nan     |            11 | distance  |
+| KNN                |         nan |                nan |            nan |    11.964 | 7.906 |                 2 | nan     | nan                  |              nan     |            11 | uniform   |
+| KNN                |         nan |                nan |            nan |    12.197 | 7.98  |                 3 | nan     | nan                  |              nan     |             7 | distance  |
+| KNN                |         nan |                nan |            nan |    12.199 | 7.966 |                 4 | nan     | nan                  |              nan     |             7 | uniform   |
+| KNN                |         nan |                nan |            nan |    12.415 | 7.734 |                 5 | nan     | nan                  |              nan     |             5 | distance  |
+
+### Test Diebold-Mariano (pérdida cuadrática)
+
+| Modelo 1           | Modelo 2           |   Estadístico DM |   p-valor | Conclusión (α=0.05)          |
+|:-------------------|:-------------------|-----------------:|----------:|:-----------------------------|
+| Ingenuo (y_t-1)    | Random Forest      |            1.293 |     0.201 | Sin diferencia significativa |
+| Ingenuo (y_t-1)    | Red Neuronal (MLP) |           -1.703 |     0.094 | Sin diferencia significativa |
+| Ingenuo (y_t-1)    | KNN                |            0.367 |     0.715 | Sin diferencia significativa |
+| Random Forest      | Red Neuronal (MLP) |           -1.783 |     0.08  | Sin diferencia significativa |
+| Random Forest      | KNN                |           -1.275 |     0.207 | Sin diferencia significativa |
+| Red Neuronal (MLP) | KNN                |            1.62  |     0.11  | Sin diferencia significativa |
+
+## 3. Clasificación de fase
+
+| modelo             |   Accuracy |   F1_macro |   F1_ponderado |
+|:-------------------|-----------:|-----------:|---------------:|
+| Random Forest      |      0.603 |      0.497 |          0.583 |
+| Red Neuronal (MLP) |      0.333 |      0.233 |          0.223 |
+| KNN                |      0.619 |      0.6   |          0.634 |
+
+Fase pronosticada actual: **Crecimiento** (modelo KNN)
+
+
+### Diebold-Mariano sobre pérdida 0-1
+
+| Modelo 1           | Modelo 2           |   Estadístico DM |   p-valor | Conclusión (α=0.05)          |
+|:-------------------|:-------------------|-----------------:|----------:|:-----------------------------|
+| Random Forest      | Red Neuronal (MLP) |           -4.163 |     0     | Random Forest es más preciso |
+| Random Forest      | KNN                |            0.228 |     0.821 | Sin diferencia significativa |
+| Red Neuronal (MLP) | KNN                |            3.446 |     0.001 | KNN es más preciso           |
+
+## 4. Marketing Mix Model
+
+| modelo             |         MSE |    RMSE |     MAE |   MAPE_% |   SMAPE_% |
+|:-------------------|------------:|--------:|--------:|---------:|----------:|
+| MMM paramétrico    | 2.02792e+08 | 14240.5 | 11344.3 |    2.968 |     2.958 |
+| Ingenuo (y_t-1)    | 1.59402e+09 | 39925.1 | 32934.8 |    8.654 |     8.591 |
+| Random Forest      | 4.01084e+08 | 20027.1 | 14948.5 |    4.006 |     3.937 |
+| Red Neuronal (MLP) | 7.54017e+08 | 27459.4 | 21509.3 |    5.525 |     5.535 |
+| KNN                | 5.61662e+08 | 23699.4 | 18880.1 |    5.071 |     4.932 |
+
+### Diebold-Mariano (ventas)
+
+| Modelo 1           | Modelo 2           |   Estadístico DM |   p-valor | Conclusión (α=0.05)               |
+|:-------------------|:-------------------|-----------------:|----------:|:----------------------------------|
+| MMM paramétrico    | Ingenuo (y_t-1)    |           -5.359 |     0     | MMM paramétrico es más preciso    |
+| MMM paramétrico    | Random Forest      |           -2.767 |     0.007 | MMM paramétrico es más preciso    |
+| MMM paramétrico    | Red Neuronal (MLP) |           -3.704 |     0     | MMM paramétrico es más preciso    |
+| MMM paramétrico    | KNN                |           -3.76  |     0     | MMM paramétrico es más preciso    |
+| Ingenuo (y_t-1)    | Random Forest      |            5.107 |     0     | Random Forest es más preciso      |
+| Ingenuo (y_t-1)    | Red Neuronal (MLP) |            2.752 |     0.008 | Red Neuronal (MLP) es más preciso |
+| Ingenuo (y_t-1)    | KNN                |            4.261 |     0     | KNN es más preciso                |
+| Random Forest      | Red Neuronal (MLP) |           -2.206 |     0.031 | Random Forest es más preciso      |
+| Random Forest      | KNN                |           -2.224 |     0.03  | Random Forest es más preciso      |
+| Red Neuronal (MLP) | KNN                |            1.243 |     0.218 | Sin diferencia significativa      |
+
+### ROAS por canal (estimado vs verdadero de la simulación)
+
+| canal       |   gasto_total |   ventas_atribuidas |   ROAS |   ROAS_marginal |   adstock_lambda |   K_saturacion |   ROAS_verdadero_simulacion |
+|:------------|--------------:|--------------------:|-------:|----------------:|-----------------:|---------------:|----------------------------:|
+| Meta Ads    |    5.336e+06  |         2.14028e+07 |   4.01 |            2.65 |             0.45 |        67771.8 |                        3.62 |
+| Google Ads  |    4.3682e+06 |         1.37164e+07 |   3.14 |            2.27 |             0.24 |        33802.6 |                        3.02 |
+| TikTok Ads  |    3.2625e+06 |         6.86317e+06 |   2.1  |            2.86 |             0.39 |        20917.7 |                        2.26 |
+| Influencers |    2.2374e+06 |         3.38105e+06 |   1.51 |            2.25 |             0.41 |        16574.2 |                        2.33 |
+
+### Presupuesto óptimo
+
+| canal       |   gasto_actual |   gasto_optimo |   cambio_% |   ventas_inc_actual |   ventas_inc_optimo |
+|:------------|---------------:|---------------:|-----------:|--------------------:|--------------------:|
+| Meta Ads    |        21057.5 |        25272.5 |       20   |             85269   |             95444.7 |
+| Google Ads  |        17238.2 |        16962   |       -1.6 |             55679.5 |             55061.7 |
+| TikTok Ads  |        12874.8 |        15203.6 |       18.1 |             28726.1 |             34585.9 |
+| Influencers |         8829.5 |         2561.9 |      -71   |             13948.9 |              1089.7 |
+
+
+{'presupuesto': 60000.0, 'ventas_incrementales_actual': 183623.567, 'ventas_incrementales_optimo': 186182.07, 'ROAS_actual': 3.06, 'ROAS_proyectado_optimo': 3.103, 'mejora_%': 1.393, 'convergio': True}
+
+## 5. Pearson vs ventas
+
+| variable       |   r_Pearson |   p_valor | significativa   | interpretación              |
+|:---------------|------------:|----------:|:----------------|:----------------------------|
+| interes_trends |       0.844 |    0      | True            | Correlación fuerte positiva |
+| Google Ads     |       0.366 |    0      | True            | Correlación débil positiva  |
+| Meta Ads       |       0.296 |    0      | True            | Correlación débil positiva  |
+| TikTok Ads     |       0.258 |    0      | True            | Correlación débil positiva  |
+| Influencers    |       0.143 |    0.0204 | True            | Correlación débil positiva  |
+
+## 6. Atribución (% del crédito)
+
+| canal       |   Primer clic |   Último clic |   Lineal |   Decaimiento temporal |   Basado en posición |   Markov |
+|:------------|--------------:|--------------:|---------:|-----------------------:|---------------------:|---------:|
+| Google Ads  |          31.1 |          30.7 |     30.4 |                   30.4 |                 30.8 |     25.9 |
+| Influencers |          10.2 |           9.9 |      9.6 |                    9.7 |                  9.9 |     12.1 |
+| Meta Ads    |          30   |          29.6 |     30.4 |                   30.2 |                 30   |     26.9 |
+| Orgánico    |          11.7 |          12   |     12.1 |                   12.1 |                 12   |     15.4 |
+| TikTok Ads  |          17   |          17.8 |     17.4 |                   17.7 |                 17.4 |     19.8 |
+
+## 7. CLV
+
+{'retencion_anual': 0.632, 'ticket_promedio': 484.728, 'frecuencia_anual': 4.172, 'margen': 0.55, 'tasa_descuento': 0.1, 'valor_anual_cliente': 1112.365, 'CLV': 1503.135}
+
+
+| modelo             |         MSE |    RMSE |     MAE |   MAPE_% |   SMAPE_% |
+|:-------------------|------------:|--------:|--------:|---------:|----------:|
+| Random Forest      | 1.3385e+06  | 1156.93 | 337.541 |  454.384 |   132.014 |
+| Red Neuronal (MLP) | 1.92106e+06 | 1386.02 | 487.844 |  276.518 |   140.491 |
+| KNN                | 1.87654e+06 | 1369.87 | 339.142 |  106.675 |   133.079 |
+
+
+| Modelo 1           | Modelo 2           |   Estadístico DM |   p-valor | Conclusión (α=0.05)          |
+|:-------------------|:-------------------|-----------------:|----------:|:-----------------------------|
+| Random Forest      | Red Neuronal (MLP) |           -0.636 |     0.525 | Sin diferencia significativa |
+| Random Forest      | KNN                |           -0.472 |     0.637 | Sin diferencia significativa |
+| Red Neuronal (MLP) | KNN                |            0.161 |     0.872 | Sin diferencia significativa |
+
+
+| segmento    |   clientes |   frecuencia_prom |   monetario_prom |   CLV_6m_prom |
+|:------------|-----------:|------------------:|-----------------:|--------------:|
+| Campeones   |       1728 |              15.3 |           8280.2 |        1637.7 |
+| En riesgo   |       1150 |               1.3 |            329.5 |         108.9 |
+| Hibernando  |        587 |               1.2 |            237.7 |         160.2 |
+| Leales      |       1189 |               4.4 |           1623.2 |         287.4 |
+| Potenciales |       1224 |               2.5 |            806.2 |         164.4 |
+
+## 8. Sentimiento
+
+Fuente: YouTube Data API (tiempo real) · 405 comentarios · ISN global = 52.3
+
+| marca          |   negativo |   neutral |   positivo |   comentarios |   ISN |
+|:---------------|-----------:|----------:|-----------:|--------------:|------:|
+| Nivea          |        1.2 |      19.8 |       79   |            81 |  77.8 |
+| CeraVe         |        7.3 |      21.9 |       70.8 |            96 |  63.5 |
+| Neutrogena     |       11.1 |      22.2 |       66.7 |            81 |  55.6 |
+| Cetaphil       |       13   |      42   |       44.9 |            69 |  31.9 |
+| La Roche-Posay |       21.8 |      29.5 |       48.7 |            78 |  26.9 |
+
+
+## 9. Evaluación del sistema multi-agente
+
+{'semanas': 4, 'inversion_total': 240000, 'ventas_incrementales': 758964, 'conversiones': 1997, 'CPA_simulado': 120.16, 'ROI_acumulado_%': 73.9, 'ROAS': 3.16, 'ROAS_proyectado': 3.1, 'ROAS_mix_actual': 3.06, 'coherencia_presupuesto_%': 100.0}
+
+## 10. Interpretación de Gemini
+
+Estimado Director de Marketing, a continuación presento la interpretación ejecutiva de los analíticos y las 5 recomendaciones estratégicas.
+
+---
+
+### Diagnóstico Ejecutivo
+
+1. **Pronóstico de Ventas:** La prueba Diebold-Mariano confirma que **ningún modelo complejo supera con significancia estadística al modelo Ingenuo** ($p > 0.05$). Random Forest ofrece el menor error absoluto ($RMSE = 5.72$, $MAPE = 9.5\%$), pero el modelo Ingenuo ($MAPE = 9.0\%$) es igualmente preciso y de costo operativo nulo. La Red Neuronal (MLP) queda descartada por sobreajuste ($MAPE = 13.16\%$).
+2. **Eficiencia de Medios (ROAS):** Nos encontramos en fase de **Crecimiento**. Aunque Meta Ads tiene el ROAS promedio más alto ($4.01$), **TikTok Ads presenta el ROAS marginal más alto ($2.86$)**, lo que indica que es el canal con mayor espacio para escalar inversión sin saturarse.
+3. **Optimización de Presupuesto ($60,000 MXN):** La reasignación óptima de inversión incrementa las ventas de **$183,623 MXN a $186,182 MXN** (+1.39% en ventas incrementales) elevando el ROAS global a $3.10$.
+4. **Valor de Vida del Cliente (CLV):** Saludable. Con una retención del $63.2\%$, frecuencia de compra de $4.17$ veces/año y margen del $55\%$, el **CLV asciende a $1,503.14 MXN** (valor anual por cliente: $1,112.36 MXN$).
+5. **Sentimiento de Marca (ISN = 52.3):** Percepción general positiva. Nivea ($77.8$) y CeraVe ($63.5$) lideran la preferencia. Los focos de riesgo son **La Roche-Posay ($26.9$) y Cetaphil ($31.9$)**, donde los temas de *"irritación/alergia"* ($15$ menciones) y *"disponibilidad"* ($11$ menciones) están penalizando la marca.
+
+---
+
+### 5 Recomendaciones Accionables
+
+1. **Escalar la inversión en TikTok Ads:** Reasignar presupuesto marginal de Meta y Google hacia TikTok Ads. Al tener el ROAS marginal más alto ($2.86$), es el canal idóneo para capitalizar la fase de crecimiento.
+2. **Implementar el mix de medios óptimo ($60k MXN):** Ejecutar de inmediato la reasignación presupuestal calculada para capturar $2,558 MXN adicionales en ventas incrementales con el mismo presupuesto disponible.
+3. **Simplificar el stack de ciencia de datos:** Adoptar **Random Forest** (o el modelo Ingenuo) para la planeación de demanda. Descartar la infraestructura de Redes Neuronales (MLP); no justifica su costo operativo frente al margen de error obtenido.
+4. **Fijar el CAC tope con base en el CLV ($1,503 MXN):** Establecer un Costo de Adquisición de Cliente (CAC) objetivo no mayor a **$375 MXN** (25% del CLV) para garantizar una relación CLV:CAC de 4:1. Diseñar programas de lealtad para elevar la frecuencia de compra de 4.17 a 5 veces/año.
+5. **Mitigar riesgos de producto y reputación:** Coordinar con Operaciones e I+D para resolver el desabasto y revisar las fórmulas asociadas a las 15 quejas por "irritación/alergia" que están erosionando el ISN de Cetaphil y La Roche-Posay.
