@@ -1,7 +1,0 @@
-.env
-venv
-.venv
-__pycache__
-.git
-outputs/resultados.pkl
-data/online_retail_II.xlsx
