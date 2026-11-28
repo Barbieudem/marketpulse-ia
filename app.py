@@ -50,6 +50,13 @@ def img(nombre):
 
 # ---------------- Barra lateral ----------------
 st.sidebar.title("📊 MarketPulse IA")
+# Identity-Aware Proxy agrega el correo del usuario en este encabezado
+try:
+    _correo = st.context.headers.get("X-Goog-Authenticated-User-Email", "")
+except Exception:
+    _correo = ""
+if _correo:
+    st.sidebar.success(f"🔒 Sesión: {_correo.split(':')[-1]}")
 st.sidebar.caption(f"Marca: **{config.MARCA}** · {config.GIRO}")
 st.sidebar.markdown(f"**Datos de tendencias:** {R['fuente_trends']}")
 st.sidebar.markdown(f"**Transacciones (CLV):** {R['fuente_tx']}")
@@ -63,6 +70,9 @@ tabs = st.tabs(["🏠 Resumen", "📈 Tendencias", "🤖 Modelos ML", "💰 MMM 
 # ---------------- Resumen ----------------
 with tabs[0]:
     st.title(f"MarketPulse IA — {config.MARCA}")
+    if config.VIDEO_INTRO_URL:
+        st.subheader("🎬 Video introductorio")
+        st.video(config.VIDEO_INTRO_URL)
     st.write("Plataforma de inteligencia de marketing: pronostica la demanda de búsqueda, clasifica la fase "
              "de la tendencia, optimiza el presupuesto entre canales, calcula el valor del cliente y genera "
              "planes de campaña con agentes de Gemini.")

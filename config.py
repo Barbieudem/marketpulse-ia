@@ -49,4 +49,8 @@ UMBRAL_FASE = 0.05  # +/-5% de cambio en 4 semanas para Crecimiento/Caída
 # Modo 2 (Vertex AI con créditos GCP): GOOGLE_GENAI_USE_VERTEXAI=true,
 #   GOOGLE_CLOUD_PROJECT y GOOGLE_CLOUD_LOCATION
 GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash")
+
+# --- Video introductorio (Firebase Storage) --------------------------------
+# URL de descarga del video en Firebase Storage (se define como variable de entorno)
+VIDEO_INTRO_URL = os.getenv("VIDEO_INTRO_URL", "")
 GEMINI_FALLBACK_MODELS = ["gemini-3.6-flash", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite"]
